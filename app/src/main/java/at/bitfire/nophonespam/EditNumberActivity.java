@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
     static final String EXTRA_NUMBER = "number";
 
     TextView tvName, tvNumber;
+    Spinner spinnerCountryCode;
 
 
     @Override
@@ -45,6 +47,9 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
 
         tvName = (TextView)findViewById(R.id.name);
         tvNumber = (TextView)findViewById(R.id.number);
+        spinnerCountryCode = (Spinner)findViewById(R.id.country_code);
+
+        spinnerCountryCode.setAdapter(new CountryCode.CountryCodeAdapter(this));
 
         if (intentNumber != null)
             getLoaderManager().initLoader(0, null, this);
@@ -61,11 +66,23 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
         return super.onPrepareOptionsMenu(menu);
     }
 
+    private String getCombinedNumber() {
+        int selectedIndex = spinnerCountryCode.getSelectedItemPosition();
+        String localNumber = tvNumber.getText().toString();
+        if (selectedIndex > 0) {
+            String dialCode = CountryCode.COUNTRIES[selectedIndex].dialCode;
+            return "+" + dialCode + localNumber;
+        }
+        return localNumber;
+    }
+
     public void onSave(MenuItem item) {
         if (validate()) {
+            String combinedNumber = getCombinedNumber();
+
             ContentValues values = new ContentValues(2);
             values.put(Number.NAME, tvName.getText().toString());
-            values.put(Number.NUMBER, Number.wildcardsViewToDb(tvNumber.getText().toString()));
+            values.put(Number.NUMBER, Number.wildcardsViewToDb(combinedNumber));
 
             DbHelper dbHelper = new DbHelper(this);
             try {
@@ -90,7 +107,8 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public void onBackPressed() {
-        if (getIntentNumber() == null && TextUtils.isEmpty(tvName.getText()) && TextUtils.isEmpty(tvNumber.getText()))
+        boolean hasCountryCode = spinnerCountryCode.getSelectedItemPosition() > 0;
+        if (getIntentNumber() == null && TextUtils.isEmpty(tvName.getText()) && TextUtils.isEmpty(tvNumber.getText()) && !hasCountryCode)
             onCancel(null);
         else
             onSave(null);
@@ -107,7 +125,8 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
             tvName.setError(getString(R.string.edit_must_not_be_empty));
             ok = false;
         }
-        if (TextUtils.isEmpty(tvNumber.getText())) {
+        boolean hasCountryCode = spinnerCountryCode.getSelectedItemPosition() > 0;
+        if (TextUtils.isEmpty(tvNumber.getText()) && !hasCountryCode) {
             tvNumber.setError(getString(R.string.edit_must_not_be_empty));
             ok = false;
         }
@@ -124,7 +143,11 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
     public void onLoadFinished(Loader<Number> loader, Number number) {
         if (number != null) {
             tvName.setText(number.name);
-            tvNumber.setText(Number.wildcardsDbToView(number.number));
+            String viewNumber = Number.wildcardsDbToView(number.number);
+            int countryIndex = CountryCode.findByDialCode(viewNumber);
+            spinnerCountryCode.setSelection(countryIndex);
+            String localPart = CountryCode.stripDialCode(viewNumber, countryIndex);
+            tvNumber.setText(localPart);
         }
     }
 

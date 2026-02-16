@@ -87,11 +87,10 @@ public class BlacklistActivity extends AppCompatActivity implements LoaderManage
 
             @Override
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.delete:
-                        deleteSelectedNumbers();
-                        actionMode.finish();
-                        return true;
+                if(menuItem.getItemId() == R.id.delete) {
+                    deleteSelectedNumbers();
+                    actionMode.finish();
+                    return true;
                 }
                 return false;
             }
@@ -217,7 +216,12 @@ public class BlacklistActivity extends AppCompatActivity implements LoaderManage
             Number number = getItem(position);
 
             TextView tv = (TextView)view.findViewById(R.id.number);
-            tv.setText(Number.wildcardsDbToView(number.number));
+            String viewNumber = Number.wildcardsDbToView(number.number);
+            int countryIndex = CountryCode.findByDialCode(viewNumber);
+            if (countryIndex > 0)
+                tv.setText(CountryCode.COUNTRIES[countryIndex].flag + " " + viewNumber);
+            else
+                tv.setText(viewNumber);
 
             tv = (TextView)view.findViewById(R.id.name);
             tv.setText(number.name);
