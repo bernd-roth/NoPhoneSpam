@@ -9,7 +9,9 @@
 package at.bitfire.nophonespam;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.LoaderManager;
+import android.app.role.RoleManager;
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,12 +23,14 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -50,6 +54,8 @@ import at.bitfire.nophonespam.model.DbHelper;
 import at.bitfire.nophonespam.model.Number;
 
 public class BlacklistActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Set<Number>>, AdapterView.OnItemClickListener {
+    private static final String TAG = "NoPhoneSpam";
+    private static final int REQUEST_CALL_SCREENING_ROLE = 1;
 
     protected Settings settings;
 
@@ -104,7 +110,37 @@ public class BlacklistActivity extends AppCompatActivity implements LoaderManage
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE }, 0);
 
+        requestCallScreeningRole();
+
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void requestCallScreeningRole() {
+        if (Build.VERSION.SDK_INT >= 29) {
+            requestCallScreeningRoleApi29();
+        } else if (Build.VERSION.SDK_INT >= 24) {
+            Snackbar.make(getWindow().getDecorView(), R.string.blacklist_enable_call_screening, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    @TargetApi(29)
+    private void requestCallScreeningRoleApi29() {
+        RoleManager roleManager = (RoleManager) getSystemService(Context.ROLE_SERVICE);
+        if (roleManager != null && !roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
+            Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
+            startActivityForResult(intent, REQUEST_CALL_SCREENING_ROLE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CALL_SCREENING_ROLE) {
+            if (resultCode != RESULT_OK) {
+                Log.w(TAG, "User declined call screening role");
+                Snackbar.make(getWindow().getDecorView(), R.string.blacklist_call_screening_denied, Snackbar.LENGTH_LONG).show();
+            }
+        }
     }
 
     protected void deleteSelectedNumbers() {

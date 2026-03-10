@@ -8,6 +8,8 @@
     <string name="blacklist_about">About NoPhoneSpam</string>
     <string name="blacklist_permissions_required">NoPhoneSpam doesn\'t have the permissions to work.</string>
     <string name="blacklist_request_permissions">Request permissions</string>
+    <string name="blacklist_enable_call_screening">Please set NoPhoneSpam as your call screening app in system settings to block WiFi calls.</string>
+    <string name="blacklist_call_screening_denied">Call screening not enabled. WiFi calls may not be blocked.</string>
     <plurals name="blacklist_call_details">
         <item quantity="one">Called at %2$s</item>
         <item quantity="other">%1$d calls, last: %2$s</item>
