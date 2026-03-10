@@ -3,12 +3,11 @@
     <string name="app_name">NoPhoneSpam</string>
 
     <!-- BlacklistActivity -->
+    <string name="blacklist_empty">No blocked numbers yet.\nTap + to add one.</string>
     <string name="blacklist_block_hidden_numbers">Block hidden numbers</string>
     <string name="blacklist_show_notifications">Show notifications</string>
     <string name="blacklist_about">About NoPhoneSpam</string>
-    <string name="blacklist_permissions_required">NoPhoneSpam doesn\'t have the permissions to work.</string>
-    <string name="blacklist_request_permissions">Request permissions</string>
-    <string name="blacklist_enable_call_screening">Please set NoPhoneSpam as your call screening app in system settings to block WiFi calls.</string>
+<string name="blacklist_enable_call_screening">Please set NoPhoneSpam as your call screening app in system settings to block WiFi calls.</string>
     <string name="blacklist_call_screening_denied">Call screening not enabled. WiFi calls may not be blocked.</string>
     <plurals name="blacklist_call_details">
         <item quantity="one">Called at %2$s</item>
@@ -29,6 +28,9 @@
     <string name="edit_number_hints">Use \"*\" as a wildcard for zero or more digits, and \"#\" for exactly one digit.</string>
     <string name="edit_must_not_be_empty">must not be empty</string>
     <string name="edit_changes_saved">Changes saved</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Blocked calls</string>
 
     <!-- BlockedCallsActivity -->
     <string name="blocked_calls_empty">No blocked calls recorded yet</string>
