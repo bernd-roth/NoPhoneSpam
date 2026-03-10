@@ -26,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import at.bitfire.nophonespam.model.BlockedCall;
 import at.bitfire.nophonespam.model.DbHelper;
 import at.bitfire.nophonespam.model.Number;
 
@@ -63,6 +64,7 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.delete).setVisible(getIntentNumber() != null);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -102,6 +104,23 @@ public class EditNumberActivity extends AppCompatActivity implements LoaderManag
     }
 
     public void onCancel(MenuItem item) {
+        finish();
+    }
+
+    public void onDelete(MenuItem item) {
+        String number = getIntentNumber();
+        if (number == null) {
+            finish();
+            return;
+        }
+        DbHelper dbHelper = new DbHelper(this);
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.delete(Number._TABLE, Number.NUMBER + "=?", new String[]{number});
+            db.delete(BlockedCall._TABLE, BlockedCall.MATCHED_PATTERN + "=?", new String[]{number});
+        } finally {
+            dbHelper.close();
+        }
         finish();
     }
 

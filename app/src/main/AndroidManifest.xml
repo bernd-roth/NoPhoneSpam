@@ -26,6 +26,11 @@
             android:parentActivityName=".BlacklistActivity"
             tools:ignore="UnusedAttribute"/>
 
+        <activity
+            android:name=".BlockedCallsActivity"
+            android:parentActivityName=".BlacklistActivity"
+            tools:ignore="UnusedAttribute"/>
+
         <receiver
             android:name=".CallReceiver"
             android:enabled="true"

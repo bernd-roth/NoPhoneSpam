@@ -12,4 +12,10 @@
           app:showAsAction="never"
           android:onClick="onCancel"/>
 
+    <item android:id="@+id/delete"
+          android:title="@string/edit_delete"
+          android:icon="@drawable/ic_delete_dark"
+          app:showAsAction="never"
+          android:onClick="onDelete"/>
+
 </menu>

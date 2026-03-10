@@ -30,6 +30,11 @@
     <string name="edit_must_not_be_empty">must not be empty</string>
     <string name="edit_changes_saved">Changes saved</string>
 
+    <!-- BlockedCallsActivity -->
+    <string name="blocked_calls_empty">No blocked calls recorded yet</string>
+    <string name="blocked_calls_clear_history">Clear history</string>
+    <string name="blocked_calls_private_number">Private number</string>
+
     <!-- CallReceiver -->
     <string name="receiver_notify_call_rejected">Call rejected</string>
     <string name="receiver_notify_private_number">Private number</string>

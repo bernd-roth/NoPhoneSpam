@@ -15,10 +15,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     public DbHelper(Context context) {
-        super(context, "database", null, 1);
+        super(context, "database", null, DB_VERSION);
     }
 
     @Override
@@ -30,20 +30,23 @@ public class DbHelper extends SQLiteOpenHelper {
                 Number.TIMES_CALLED + " INTEGER NOT NULL DEFAULT 0" +
         ")");
 
-        ContentValues values = new ContentValues();
-
-        /*values.put(Number.NAME, "Werbekuh Schule BV");
-        values.put(Number.NUMBER, "+431810279346");
-        db.insert(Number._TABLE, null, values);
-
-        values.put(Number.NAME, "Luxemburg");
-        values.put(Number.NUMBER, "+352*");
-        db.insert(Number._TABLE, null, values);*/
-
+        db.execSQL("CREATE TABLE " + BlockedCall._TABLE + "(" +
+                BlockedCall.ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                BlockedCall.MATCHED_PATTERN + " TEXT NOT NULL," +
+                BlockedCall.INCOMING_NUMBER + " TEXT," +
+                BlockedCall.BLOCKED_AT + " INTEGER NOT NULL" +
+        ")");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int from, int to) {
+        if (from < 2)
+            db.execSQL("CREATE TABLE " + BlockedCall._TABLE + "(" +
+                    BlockedCall.ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    BlockedCall.MATCHED_PATTERN + " TEXT NOT NULL," +
+                    BlockedCall.INCOMING_NUMBER + " TEXT," +
+                    BlockedCall.BLOCKED_AT + " INTEGER NOT NULL" +
+            ")");
     }
 
 }

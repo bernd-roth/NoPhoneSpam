@@ -22,7 +22,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,13 +30,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.SparseBooleanArray;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -46,8 +42,6 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import at.bitfire.nophonespam.model.DbHelper;
@@ -73,36 +67,14 @@ public class BlacklistActivity extends AppCompatActivity implements LoaderManage
         list = (ListView)findViewById(R.id.numbers);
         list.setAdapter(adapter = new NumberAdapter(this));
         list.setOnItemClickListener(this);
-
-        list.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        list.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public void onItemCheckedStateChanged(ActionMode actionMode, int position, long id, boolean checked) {
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-                getMenuInflater().inflate(R.menu.blacklist_delete_numbers, menu);
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Number number = adapter.getItem(position);
+                Intent intent = new Intent(BlacklistActivity.this, EditNumberActivity.class);
+                intent.putExtra(EditNumberActivity.EXTRA_NUMBER, number.number);
+                startActivity(intent);
                 return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-                if(menuItem.getItemId() == R.id.delete) {
-                    deleteSelectedNumbers();
-                    actionMode.finish();
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode actionMode) {
             }
         });
 
@@ -141,34 +113,6 @@ public class BlacklistActivity extends AppCompatActivity implements LoaderManage
                 Snackbar.make(getWindow().getDecorView(), R.string.blacklist_call_screening_denied, Snackbar.LENGTH_LONG).show();
             }
         }
-    }
-
-    protected void deleteSelectedNumbers() {
-        final List<String> numbers = new LinkedList<>();
-
-        SparseBooleanArray checked = list.getCheckedItemPositions();
-        for (int i = checked.size() - 1; i >= 0; i--)
-            if (checked.valueAt(i)) {
-                int position = checked.keyAt(i);
-                numbers.add(adapter.getItem(position).number);
-            }
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                DbHelper dbHelper = new DbHelper(BlacklistActivity.this);
-                try {
-                    SQLiteDatabase db = dbHelper.getWritableDatabase();
-                    for (String number : numbers)
-                        db.delete(Number._TABLE, Number.NUMBER + "=?", new String[] { number });
-                } finally {
-                    dbHelper.close();
-                }
-
-                getLoaderManager().restartLoader(0, null, BlacklistActivity.this);
-                return null;
-            }
-        }.execute();
     }
 
     @Override
@@ -279,8 +223,9 @@ public class BlacklistActivity extends AppCompatActivity implements LoaderManage
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         Number number = adapter.getItem(position);
 
-        Intent intent = new Intent(this, EditNumberActivity.class);
-        intent.putExtra(EditNumberActivity.EXTRA_NUMBER, number.number);
+        Intent intent = new Intent(this, BlockedCallsActivity.class);
+        intent.putExtra(BlockedCallsActivity.EXTRA_NUMBER, number.number);
+        intent.putExtra(BlockedCallsActivity.EXTRA_NAME, number.name);
         startActivity(intent);
     }
 

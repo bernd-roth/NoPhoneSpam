@@ -23,6 +23,7 @@ import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import at.bitfire.nophonespam.model.BlockedCall;
 import at.bitfire.nophonespam.model.DbHelper;
 import at.bitfire.nophonespam.model.Number;
 
@@ -90,10 +91,18 @@ public class BlockedCallHandler {
                     DatabaseUtils.cursorRowToContentValues(c, values);
                     Number number = Number.fromValues(values);
 
+                    long now = System.currentTimeMillis();
+
                     values.clear();
-                    values.put(Number.LAST_CALL, System.currentTimeMillis());
+                    values.put(Number.LAST_CALL, now);
                     values.put(Number.TIMES_CALLED, number.timesCalled + 1);
                     db.update(Number._TABLE, values, Number.NUMBER + "=?", new String[]{number.number});
+
+                    ContentValues callValues = new ContentValues();
+                    callValues.put(BlockedCall.MATCHED_PATTERN, number.number);
+                    callValues.put(BlockedCall.INCOMING_NUMBER, incomingNumber);
+                    callValues.put(BlockedCall.BLOCKED_AT, now);
+                    db.insert(BlockedCall._TABLE, null, callValues);
 
                     BlacklistObserver.notifyUpdated();
                     return number;
