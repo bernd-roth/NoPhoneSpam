@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId "at.bitfire.nophonespam"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode 3
-        versionName "0.2.1"
+        versionName "1.0.0"
     }
 
     buildTypes {

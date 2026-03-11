@@ -1,14 +1,13 @@
 package at.bitfire.nophonespam
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.DatabaseUtils
-import android.os.Build
+import android.provider.ContactsContract
 import android.util.Log
+import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import at.bitfire.nophonespam.model.BlockedCall
@@ -63,9 +62,34 @@ object BlockedCallHandler {
         return null
     }
 
+    fun isNumberInContacts(context: Context, number: String): Boolean {
+        val uri = ContactsContract.PhoneLookup.CONTENT_FILTER_URI.buildUpon()
+            .appendPath(number).build()
+        return context.contentResolver.query(
+            uri, arrayOf(ContactsContract.PhoneLookup._ID), null, null, null
+        )?.use { it.moveToFirst() } == true
+    }
+
+    fun logNonContactBlock(context: Context, incomingNumber: String) {
+        val dbHelper = DbHelper(context)
+        try {
+            val db = dbHelper.writableDatabase
+            val now = System.currentTimeMillis()
+            val callValues = ContentValues().apply {
+                put(BlockedCall.MATCHED_PATTERN, "[not in contacts]")
+                put(BlockedCall.INCOMING_NUMBER, incomingNumber)
+                put(BlockedCall.BLOCKED_AT, now)
+            }
+            db.insert(BlockedCall._TABLE, null, callValues)
+        } finally {
+            dbHelper.close()
+        }
+    }
+
     fun shouldBlock(context: Context, incomingNumber: String?): Boolean {
+        val settings = Settings(context)
         if (incomingNumber.isNullOrEmpty()) {
-            return Settings(context).blockHiddenNumbers
+            return settings.blockHiddenNumbers
         }
         val dbHelper = DbHelper(context)
         try {
@@ -77,33 +101,30 @@ object BlockedCallHandler {
                 null, null, null
             )
             try {
-                return c.moveToNext()
+                if (c.moveToNext()) return true
             } finally {
                 c.close()
             }
         } finally {
             dbHelper.close()
         }
+        if (settings.blockNonContacts && !isNumberInContacts(context, incomingNumber)) {
+            return true
+        }
+        return false
     }
 
     fun showNotification(context: Context, number: Number?) {
         val settings = Settings(context)
         if (!settings.showNotifications) return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                context.getString(R.string.notification_channel_name),
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nm.createNotificationChannel(channel)
-        }
+        NotificationManagerCompat.from(context).createNotificationChannel(
+            NotificationChannelCompat.Builder(NOTIFICATION_CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_HIGH)
+                .setName(context.getString(R.string.notification_channel_name))
+                .build()
+        )
 
-        var pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            pendingIntentFlags = pendingIntentFlags or PendingIntent.FLAG_IMMUTABLE
-        }
+        val pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
         val contentIntent = PendingIntent.getActivity(
             context, 0,

@@ -30,6 +30,9 @@ class BlacklistViewModel(application: Application) : AndroidViewModel(applicatio
     private val _showNotifications = MutableStateFlow(settings.showNotifications)
     val showNotifications: StateFlow<Boolean> = _showNotifications.asStateFlow()
 
+    private val _blockNonContacts = MutableStateFlow(settings.blockNonContacts)
+    val blockNonContacts: StateFlow<Boolean> = _blockNonContacts.asStateFlow()
+
     init {
         viewModelScope.launch {
             BlacklistObserver.updates
@@ -70,5 +73,11 @@ class BlacklistViewModel(application: Application) : AndroidViewModel(applicatio
         val newValue = !settings.showNotifications
         settings.showNotifications = newValue
         _showNotifications.value = newValue
+    }
+
+    fun toggleBlockNonContacts() {
+        val newValue = !settings.blockNonContacts
+        settings.blockNonContacts = newValue
+        _blockNonContacts.value = newValue
     }
 }

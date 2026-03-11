@@ -6,6 +6,7 @@
     <string name="blacklist_empty">No blocked numbers yet.\nTap + to add one.</string>
     <string name="blacklist_block_hidden_numbers">Block hidden numbers</string>
     <string name="blacklist_show_notifications">Show notifications</string>
+    <string name="blacklist_block_non_contacts">Block numbers not in contacts</string>
     <string name="blacklist_about">About NoPhoneSpam</string>
 <string name="blacklist_enable_call_screening">Please set NoPhoneSpam as your call screening app in system settings to block WiFi calls.</string>
     <string name="blacklist_call_screening_denied">Call screening not enabled. WiFi calls may not be blocked.</string>

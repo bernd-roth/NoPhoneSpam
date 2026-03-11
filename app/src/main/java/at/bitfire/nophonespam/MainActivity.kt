@@ -36,6 +36,9 @@ class MainActivity : ComponentActivity() {
     private val requestNotificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
+    private val requestContactsPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,6 +48,12 @@ class MainActivity : ComponentActivity() {
             != PackageManager.PERMISSION_GRANTED
         ) {
             requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestContactsPermission.launch(Manifest.permission.READ_CONTACTS)
         }
 
         requestCallScreeningRoleIfNeeded()

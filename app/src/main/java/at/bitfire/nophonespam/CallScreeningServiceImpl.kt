@@ -1,11 +1,9 @@
 package at.bitfire.nophonespam
 
-import android.annotation.TargetApi
 import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.util.Log
 
-@TargetApi(24)
 class CallScreeningServiceImpl : CallScreeningService() {
     private val TAG = "NoPhoneSpam"
 
@@ -30,6 +28,15 @@ class CallScreeningServiceImpl : CallScreeningService() {
             matchedNumber = BlockedCallHandler.queryAndUpdateDb(this, incomingNumber)
             if (matchedNumber != null) {
                 block = true
+            }
+        }
+
+        if (!block && !incomingNumber.isNullOrEmpty()) {
+            val settings = Settings(this)
+            if (settings.blockNonContacts && !BlockedCallHandler.isNumberInContacts(this, incomingNumber)) {
+                block = true
+                matchedNumber = at.bitfire.nophonespam.model.Number(number = incomingNumber)
+                BlockedCallHandler.logNonContactBlock(this, incomingNumber)
             }
         }
 

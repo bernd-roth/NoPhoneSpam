@@ -61,8 +61,10 @@ fun BlacklistScreen(
     val showNotifications by vm.showNotifications.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    val blockNonContacts by vm.blockNonContacts.collectAsStateWithLifecycle()
     val blockHiddenLabel = stringResource(R.string.blacklist_block_hidden_numbers)
     val showNotificationsLabel = stringResource(R.string.blacklist_show_notifications)
+    val blockNonContactsLabel = stringResource(R.string.blacklist_block_non_contacts)
 
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -98,6 +100,15 @@ fun BlacklistScreen(
                             },
                             onClick = {
                                 vm.toggleShowNotifications()
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(if (blockNonContacts) "\u2713 $blockNonContactsLabel" else blockNonContactsLabel)
+                            },
+                            onClick = {
+                                vm.toggleBlockNonContacts()
                                 menuExpanded = false
                             }
                         )

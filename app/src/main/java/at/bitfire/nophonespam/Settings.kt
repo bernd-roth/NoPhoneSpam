@@ -14,8 +14,13 @@ class Settings(context: Context) {
         get() = pref.getBoolean(PREF_NOTIFICATIONS, true)
         set(value) { pref.edit().putBoolean(PREF_NOTIFICATIONS, value).apply() }
 
+    var blockNonContacts: Boolean
+        get() = pref.getBoolean(PREF_BLOCK_NON_CONTACTS, false)
+        set(value) { pref.edit().putBoolean(PREF_BLOCK_NON_CONTACTS, value).apply() }
+
     companion object {
         private const val PREF_BLOCK_HIDDEN_NUMBERS = "blockHiddenNumbers"
         private const val PREF_NOTIFICATIONS = "notifications"
+        private const val PREF_BLOCK_NON_CONTACTS = "blockNonContacts"
     }
 }
