@@ -20,13 +20,19 @@ object BlockedCallHandler {
     private const val NOTIFY_REJECTED = 0
     const val NOTIFICATION_CHANNEL_ID = "blocked_calls"
 
+    private fun activeTimeRangeFilter(now: Long): String =
+        "((${Number.BLOCK_FROM} IS NULL AND ${Number.BLOCK_UNTIL} IS NULL) OR " +
+        "((${Number.BLOCK_FROM} IS NULL OR $now >= ${Number.BLOCK_FROM}) AND " +
+        "(${Number.BLOCK_UNTIL} IS NULL OR $now <= ${Number.BLOCK_UNTIL})))"
+
     fun queryAndUpdateDb(context: Context, incomingNumber: String): Number? {
+        val now = System.currentTimeMillis()
         val dbHelper = DbHelper(context)
         try {
             val db = dbHelper.writableDatabase
             val c = db.query(
                 Number._TABLE, null,
-                "? LIKE ${Number.NUMBER}",
+                "? LIKE ${Number.NUMBER} AND ${activeTimeRangeFilter(now)}",
                 arrayOf(incomingNumber),
                 null, null, null
             )
@@ -131,12 +137,13 @@ object BlockedCallHandler {
         if (incomingNumber.isNullOrEmpty()) {
             return settings.blockHiddenNumbers
         }
+        val now = System.currentTimeMillis()
         val dbHelper = DbHelper(context)
         try {
             val db = dbHelper.readableDatabase
             val c = db.query(
                 Number._TABLE, null,
-                "? LIKE ${Number.NUMBER}",
+                "? LIKE ${Number.NUMBER} AND ${activeTimeRangeFilter(now)}",
                 arrayOf(incomingNumber),
                 null, null, null
             )

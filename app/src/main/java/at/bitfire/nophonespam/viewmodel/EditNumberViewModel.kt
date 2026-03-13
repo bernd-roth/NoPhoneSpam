@@ -6,6 +6,7 @@ import android.database.DatabaseUtils
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import at.bitfire.nophonespam.BlacklistObserver
+import at.bitfire.nophonespam.BlockScheduler
 import at.bitfire.nophonespam.model.BlockedCall
 import at.bitfire.nophonespam.model.DbHelper
 import at.bitfire.nophonespam.model.Number
@@ -49,7 +50,14 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun save(existingPattern: String?, name: String, numberDb: String, onDone: () -> Unit) {
+    fun save(
+        existingPattern: String?,
+        name: String,
+        numberDb: String,
+        blockFrom: Long?,
+        blockUntil: Long?,
+        onDone: () -> Unit
+    ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val dbHelper = DbHelper(getApplication())
@@ -58,6 +66,8 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
                     val values = ContentValues().apply {
                         put(Number.NAME, name)
                         put(Number.NUMBER, numberDb)
+                        if (blockFrom != null) put(Number.BLOCK_FROM, blockFrom) else putNull(Number.BLOCK_FROM)
+                        if (blockUntil != null) put(Number.BLOCK_UNTIL, blockUntil) else putNull(Number.BLOCK_UNTIL)
                     }
                     if (existingPattern != null) {
                         db.update(Number._TABLE, values, "${Number.NUMBER}=?", arrayOf(existingPattern))
@@ -67,6 +77,16 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
                     BlacklistObserver.notifyUpdated()
                 } finally {
                     dbHelper.close()
+                }
+
+                // Cancel any existing alarm for the old pattern
+                val oldPattern = existingPattern ?: numberDb
+                BlockScheduler.cancelExpiry(getApplication(), oldPattern)
+
+                // Schedule expiry alarm if blockUntil is in the future
+                val now = System.currentTimeMillis()
+                if (blockUntil != null && blockUntil > now) {
+                    BlockScheduler.scheduleExpiry(getApplication(), numberDb, blockUntil)
                 }
             }
             onDone()
@@ -85,6 +105,7 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
                 } finally {
                     dbHelper.close()
                 }
+                BlockScheduler.cancelExpiry(getApplication(), pattern)
             }
             onDone()
         }
