@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.DatabaseUtils
+import android.database.sqlite.SQLiteDatabase
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.core.app.NotificationChannelCompat
@@ -70,17 +71,56 @@ object BlockedCallHandler {
         )?.use { it.moveToFirst() } == true
     }
 
-    fun logNonContactBlock(context: Context, incomingNumber: String) {
+    fun logNonContactBlock(context: Context, incomingNumber: String): Number? {
+        val countryIndex = CountryCode.findByDialCode(incomingNumber)
+        val pattern: String? = if (countryIndex > 0)
+            "+${CountryCode.COUNTRIES[countryIndex].dialCode}%" else null
+
         val dbHelper = DbHelper(context)
         try {
             val db = dbHelper.writableDatabase
             val now = System.currentTimeMillis()
-            val callValues = ContentValues().apply {
-                put(BlockedCall.MATCHED_PATTERN, "[not in contacts]")
-                put(BlockedCall.INCOMING_NUMBER, incomingNumber)
-                put(BlockedCall.BLOCKED_AT, now)
+
+            if (pattern != null) {
+                // Insert pattern row if it doesn't exist yet
+                val insertValues = ContentValues().apply {
+                    put(Number.NUMBER, pattern)
+                    put(Number.TIMES_CALLED, 0)
+                }
+                db.insertWithOnConflict(Number._TABLE, null, insertValues, SQLiteDatabase.CONFLICT_IGNORE)
+
+                // Increment call stats in-place (no read-modify-write race)
+                db.execSQL(
+                    "UPDATE ${Number._TABLE} SET ${Number.TIMES_CALLED}=${Number.TIMES_CALLED}+1, ${Number.LAST_CALL}=? WHERE ${Number.NUMBER}=?",
+                    arrayOf(now, pattern)
+                )
+
+                val callValues = ContentValues().apply {
+                    put(BlockedCall.MATCHED_PATTERN, pattern)
+                    put(BlockedCall.INCOMING_NUMBER, incomingNumber)
+                    put(BlockedCall.BLOCKED_AT, now)
+                }
+                db.insert(BlockedCall._TABLE, null, callValues)
+
+                BlacklistObserver.notifyUpdated()
+
+                val c = db.query(Number._TABLE, null, "${Number.NUMBER}=?", arrayOf(pattern), null, null, null)
+                return c.use {
+                    if (it.moveToFirst()) {
+                        val values = ContentValues()
+                        DatabaseUtils.cursorRowToContentValues(it, values)
+                        Number.fromValues(values)
+                    } else Number(number = pattern, timesCalled = 1, lastCall = now)
+                }
+            } else {
+                val callValues = ContentValues().apply {
+                    put(BlockedCall.MATCHED_PATTERN, "[not in contacts]")
+                    put(BlockedCall.INCOMING_NUMBER, incomingNumber)
+                    put(BlockedCall.BLOCKED_AT, now)
+                }
+                db.insert(BlockedCall._TABLE, null, callValues)
+                return null
             }
-            db.insert(BlockedCall._TABLE, null, callValues)
         } finally {
             dbHelper.close()
         }
@@ -134,7 +174,7 @@ object BlockedCallHandler {
 
         val contentText = when {
             number?.name != null -> number.name
-            number != null -> number.number
+            number != null -> Number.wildcardsDbToView(number.number)
             else -> context.getString(R.string.receiver_notify_private_number)
         }
 
