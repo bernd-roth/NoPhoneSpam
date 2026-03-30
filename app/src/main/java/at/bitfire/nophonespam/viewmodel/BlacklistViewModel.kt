@@ -24,6 +24,9 @@ class BlacklistViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val settings = Settings(application)
 
+    private val _blockingEnabled = MutableStateFlow(settings.blockingEnabled)
+    val blockingEnabled: StateFlow<Boolean> = _blockingEnabled.asStateFlow()
+
     private val _blockHiddenNumbers = MutableStateFlow(settings.blockHiddenNumbers)
     val blockHiddenNumbers: StateFlow<Boolean> = _blockHiddenNumbers.asStateFlow()
 
@@ -61,6 +64,12 @@ class BlacklistViewModel(application: Application) : AndroidViewModel(applicatio
                 dbHelper.close()
             }
         }
+    }
+
+    fun toggleBlockingEnabled() {
+        val newValue = !settings.blockingEnabled
+        settings.blockingEnabled = newValue
+        _blockingEnabled.value = newValue
     }
 
     fun toggleBlockHiddenNumbers() {

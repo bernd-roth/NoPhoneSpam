@@ -3,6 +3,7 @@
     <string name="app_name">NoPhoneSpam</string>
 
     <!-- BlacklistActivity -->
+    <string name="blacklist_blocking_enabled">ブロック有効</string>
     <string name="blacklist_block_hidden_numbers">非表示の番号をブロック</string>
     <string name="blacklist_show_notifications">通知を表示</string>
     <string name="blacklist_about">NoPhoneSpam について</string>

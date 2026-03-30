@@ -61,7 +61,9 @@ fun BlacklistScreen(
     val showNotifications by vm.showNotifications.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    val blockingEnabled by vm.blockingEnabled.collectAsStateWithLifecycle()
     val blockNonContacts by vm.blockNonContacts.collectAsStateWithLifecycle()
+    val blockingEnabledLabel = stringResource(R.string.blacklist_blocking_enabled)
     val blockHiddenLabel = stringResource(R.string.blacklist_block_hidden_numbers)
     val showNotificationsLabel = stringResource(R.string.blacklist_show_notifications)
     val blockNonContactsLabel = stringResource(R.string.blacklist_block_non_contacts)
@@ -85,6 +87,15 @@ fun BlacklistScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(if (blockingEnabled) "\u2713 $blockingEnabledLabel" else blockingEnabledLabel)
+                            },
+                            onClick = {
+                                vm.toggleBlockingEnabled()
+                                menuExpanded = false
+                            }
+                        )
                         DropdownMenuItem(
                             text = {
                                 Text(if (blockHiddenNumbers) "\u2713 $blockHiddenLabel" else blockHiddenLabel)

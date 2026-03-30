@@ -4,6 +4,7 @@
 
     <!-- BlacklistActivity -->
     <string name="blacklist_empty">No blocked numbers yet.\nTap + to add one.</string>
+    <string name="blacklist_blocking_enabled">Blocking enabled</string>
     <string name="blacklist_block_hidden_numbers">Block hidden numbers</string>
     <string name="blacklist_show_notifications">Show notifications</string>
     <string name="blacklist_block_non_contacts">Block numbers not in contacts</string>

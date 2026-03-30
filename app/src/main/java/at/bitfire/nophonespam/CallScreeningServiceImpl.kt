@@ -16,6 +16,12 @@ class CallScreeningServiceImpl : CallScreeningService() {
             return
         }
 
+        // Global blocking toggle — let all calls through when disabled
+        if (!Settings(this).blockingEnabled) {
+            respondToCall(callDetails, CallResponse.Builder().build())
+            return
+        }
+
         var incomingNumber: String? = null
         val handle = callDetails.handle
         if (handle != null && "tel" == handle.scheme) {

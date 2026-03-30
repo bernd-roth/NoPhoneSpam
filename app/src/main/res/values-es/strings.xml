@@ -3,6 +3,7 @@
     <string name="app_name">NoPhoneSpam</string>
 
     <!-- BlacklistActivity -->
+    <string name="blacklist_blocking_enabled">Bloqueo activado</string>
     <string name="blacklist_block_hidden_numbers">Bloquear números ocultos</string>
     <string name="blacklist_show_notifications">Mostrar notificaciones</string>
     <string name="blacklist_about">Sobre NoPhoneSpam</string>

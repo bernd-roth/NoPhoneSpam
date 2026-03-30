@@ -6,6 +6,10 @@ class Settings(context: Context) {
 
     private val pref = context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
 
+    var blockingEnabled: Boolean
+        get() = pref.getBoolean(PREF_BLOCKING_ENABLED, true)
+        set(value) { pref.edit().putBoolean(PREF_BLOCKING_ENABLED, value).apply() }
+
     var blockHiddenNumbers: Boolean
         get() = pref.getBoolean(PREF_BLOCK_HIDDEN_NUMBERS, false)
         set(value) { pref.edit().putBoolean(PREF_BLOCK_HIDDEN_NUMBERS, value).apply() }
@@ -19,6 +23,7 @@ class Settings(context: Context) {
         set(value) { pref.edit().putBoolean(PREF_BLOCK_NON_CONTACTS, value).apply() }
 
     companion object {
+        private const val PREF_BLOCKING_ENABLED = "blockingEnabled"
         private const val PREF_BLOCK_HIDDEN_NUMBERS = "blockHiddenNumbers"
         private const val PREF_NOTIFICATIONS = "notifications"
         private const val PREF_BLOCK_NON_CONTACTS = "blockNonContacts"
