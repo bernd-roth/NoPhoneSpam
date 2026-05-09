@@ -128,7 +128,7 @@ fun BlacklistScreen(
                             onClick = {
                                 menuExpanded = false
                                 context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, "https://gitlab.com/bitfireAT/NoPhoneSpam/".toUri())
+                                    Intent(Intent.ACTION_VIEW, "https://github.com/bernd-roth/NoPhoneSpam".toUri())
                                 )
                             }
                         )
