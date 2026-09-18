@@ -107,19 +107,19 @@ fun BlacklistScreen(
                         )
                         DropdownMenuItem(
                             text = {
-                                Text(if (showNotifications) "\u2713 $showNotificationsLabel" else showNotificationsLabel)
+                                Text(if (blockNonContacts) "\u2713 $blockNonContactsLabel" else blockNonContactsLabel)
                             },
                             onClick = {
-                                vm.toggleShowNotifications()
+                                vm.toggleBlockNonContacts()
                                 menuExpanded = false
                             }
                         )
                         DropdownMenuItem(
                             text = {
-                                Text(if (blockNonContacts) "\u2713 $blockNonContactsLabel" else blockNonContactsLabel)
+                                Text(if (showNotifications) "\u2713 $showNotificationsLabel" else showNotificationsLabel)
                             },
                             onClick = {
-                                vm.toggleBlockNonContacts()
+                                vm.toggleShowNotifications()
                                 menuExpanded = false
                             }
                         )
