@@ -134,9 +134,17 @@ object BlockedCallHandler {
 
     fun shouldBlock(context: Context, incomingNumber: String?): Boolean {
         val settings = Settings(context)
-        if (incomingNumber.isNullOrEmpty()) {
-            return settings.blockHiddenNumbers
-        }
+        return CallBlockingPolicy.shouldBlock(
+            incomingNumber = incomingNumber,
+            blockingEnabled = settings.blockingEnabled,
+            blockHiddenNumbers = settings.blockHiddenNumbers,
+            blockNonContacts = settings.blockNonContacts,
+            isContact = { isNumberInContacts(context, it) },
+            matchesBlacklist = { matchesBlacklist(context, it) }
+        )
+    }
+
+    private fun matchesBlacklist(context: Context, incomingNumber: String): Boolean {
         val now = System.currentTimeMillis()
         val dbHelper = DbHelper(context)
         try {
@@ -154,9 +162,6 @@ object BlockedCallHandler {
             }
         } finally {
             dbHelper.close()
-        }
-        if (settings.blockNonContacts && !isNumberInContacts(context, incomingNumber)) {
-            return true
         }
         return false
     }

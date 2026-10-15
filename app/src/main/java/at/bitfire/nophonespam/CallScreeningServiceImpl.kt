@@ -30,28 +30,23 @@ class CallScreeningServiceImpl : CallScreeningService() {
 
         Log.i(TAG, "Screening call: $incomingNumber")
 
-        var block = false
         var matchedNumber: at.bitfire.nophonespam.model.Number? = null
+        val settings = Settings(this)
+        val block = CallBlockingPolicy.shouldBlock(
+            incomingNumber = incomingNumber,
+            blockingEnabled = settings.blockingEnabled,
+            blockHiddenNumbers = settings.blockHiddenNumbers,
+            blockNonContacts = settings.blockNonContacts,
+            isContact = { BlockedCallHandler.isNumberInContacts(this, it) },
+            matchesBlacklist = {
+                matchedNumber = BlockedCallHandler.queryAndUpdateDb(this, it)
+                matchedNumber != null
+            }
+        )
 
-        if (incomingNumber.isNullOrEmpty()) {
-            val settings = Settings(this)
-            if (settings.blockHiddenNumbers) {
-                block = true
-            }
-        } else {
-            matchedNumber = BlockedCallHandler.queryAndUpdateDb(this, incomingNumber)
-            if (matchedNumber != null) {
-                block = true
-            }
-        }
-
-        if (!block && !incomingNumber.isNullOrEmpty()) {
-            val settings = Settings(this)
-            if (settings.blockNonContacts && !BlockedCallHandler.isNumberInContacts(this, incomingNumber)) {
-                block = true
-                matchedNumber = BlockedCallHandler.logNonContactBlock(this, incomingNumber)
-                    ?: at.bitfire.nophonespam.model.Number(number = incomingNumber)
-            }
+        if (block && matchedNumber == null && !incomingNumber.isNullOrEmpty()) {
+            matchedNumber = BlockedCallHandler.logNonContactBlock(this, incomingNumber)
+                ?: at.bitfire.nophonespam.model.Number(number = incomingNumber)
         }
 
         if (block) {
