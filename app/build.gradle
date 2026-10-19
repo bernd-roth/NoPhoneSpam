@@ -31,6 +31,12 @@ android {
         jvmToolchain(17)
     }
 
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "nophonespam.apk"
+        }
+    }
+
     lint {
         disable 'GradleDynamicVersion'
         disable 'GoogleAppIndexingWarning'
