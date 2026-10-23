@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NoPhoneSpam</string>
+    <string name="blacklist_history_only">Nur Verlauf · blockiert keine Anrufe</string>
+    <string name="edit_block_matching_calls">Passende Anrufe blockieren</string>
 
     <!-- BlacklistActivity -->
     <string name="blacklist_blocking_enabled">Blockierung aktiviert</string>

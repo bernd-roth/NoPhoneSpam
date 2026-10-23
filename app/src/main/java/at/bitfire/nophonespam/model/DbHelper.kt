@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 class DbHelper(context: Context) : SQLiteOpenHelper(context, "database", null, DB_VERSION) {
 
     companion object {
-        private const val DB_VERSION = 3
+        private const val DB_VERSION = 4
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -18,7 +18,8 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, "database", null, D
                 "${Number.LAST_CALL} INTEGER NULL," +
                 "${Number.TIMES_CALLED} INTEGER NOT NULL DEFAULT 0," +
                 "${Number.BLOCK_FROM} INTEGER NULL," +
-                "${Number.BLOCK_UNTIL} INTEGER NULL" +
+                "${Number.BLOCK_UNTIL} INTEGER NULL," +
+                "${Number.IS_BLOCKING_RULE} INTEGER NOT NULL DEFAULT 1" +
             ")"
         )
         db.execSQL(
@@ -45,6 +46,12 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, "database", null, D
         if (from < 3) {
             db.execSQL("ALTER TABLE ${Number._TABLE} ADD COLUMN ${Number.BLOCK_FROM} INTEGER NULL")
             db.execSQL("ALTER TABLE ${Number._TABLE} ADD COLUMN ${Number.BLOCK_UNTIL} INTEGER NULL")
+        }
+        if (from < 4) {
+            // Older versions did not record whether a country row was created
+            // manually or by call logging. Preserve existing rules rather than
+            // silently disabling a country the user may have chosen to block.
+            db.execSQL("ALTER TABLE ${Number._TABLE} ADD COLUMN ${Number.IS_BLOCKING_RULE} INTEGER NOT NULL DEFAULT 1")
         }
     }
 }

@@ -69,6 +69,7 @@ fun EditNumberScreen(
     val loadedNumber by vm.number.collectAsStateWithLifecycle()
 
     var name by remember { mutableStateOf("") }
+    var isBlockingRule by remember { mutableStateOf(true) }
     var selectedCountryIndex by remember { mutableIntStateOf(0) }
     var localNumber by remember { mutableStateOf("") }
     var countryDropdownExpanded by remember { mutableStateOf(false) }
@@ -100,6 +101,7 @@ fun EditNumberScreen(
     LaunchedEffect(loadedNumber) {
         val n = loadedNumber ?: return@LaunchedEffect
         name = n.name ?: ""
+        isBlockingRule = n.isBlockingRule
         val viewNumber = Number.wildcardsDbToView(n.number)
         val countryIndex = CountryCode.findByDialCode(viewNumber)
         selectedCountryIndex = countryIndex
@@ -143,7 +145,7 @@ fun EditNumberScreen(
     fun doSave() {
         val combinedNumber = buildCombinedNumber()
         val numberDb = Number.wildcardsViewToDb(combinedNumber)
-        vm.save(existingPattern, name, numberDb, computeBlockFrom(), computeBlockUntil(), onBack)
+        vm.save(existingPattern, name, numberDb, computeBlockFrom(), computeBlockUntil(), isBlockingRule, onBack)
     }
 
     fun doCancel() {
@@ -276,6 +278,18 @@ fun EditNumberScreen(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.edit_block_matching_calls),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Switch(checked = isBlockingRule, onCheckedChange = { isBlockingRule = it })
+            }
+
             // Time-period blocking section
             Row(
                 modifier = Modifier
@@ -290,6 +304,7 @@ fun EditNumberScreen(
                 )
                 Switch(
                     checked = blockEnabled,
+                    enabled = isBlockingRule,
                     onCheckedChange = { enabled ->
                         blockEnabled = enabled
                         if (enabled) {
@@ -305,7 +320,7 @@ fun EditNumberScreen(
                 )
             }
 
-            if (blockEnabled) {
+            if (isBlockingRule && blockEnabled) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

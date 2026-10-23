@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NoPhoneSpam</string>
+    <string name="blacklist_history_only">History only · does not block calls</string>
+    <string name="edit_block_matching_calls">Block calls matching this entry</string>
 
     <!-- BlacklistActivity -->
     <string name="blacklist_empty">No blocked numbers yet.\nTap + to add one.</string>

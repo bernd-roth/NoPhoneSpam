@@ -9,7 +9,8 @@ data class Number(
     val lastCall: Long? = null,
     val timesCalled: Int = 0,
     val blockFrom: Long? = null,
-    val blockUntil: Long? = null
+    val blockUntil: Long? = null,
+    val isBlockingRule: Boolean = true
 ) {
     /** Use the caller's country as the label when no custom name was saved. */
     val displayName: String?
@@ -25,6 +26,7 @@ data class Number(
         const val TIMES_CALLED = "timesCalled"
         const val BLOCK_FROM = "block_from"
         const val BLOCK_UNTIL = "block_until"
+        const val IS_BLOCKING_RULE = "is_blocking_rule"
 
         fun fromValues(values: ContentValues): Number = Number(
             number = values.getAsString(NUMBER) ?: "",
@@ -32,7 +34,8 @@ data class Number(
             lastCall = values.getAsLong(LAST_CALL),
             timesCalled = values.getAsInteger(TIMES_CALLED) ?: 0,
             blockFrom = values.getAsLong(BLOCK_FROM),
-            blockUntil = values.getAsLong(BLOCK_UNTIL)
+            blockUntil = values.getAsLong(BLOCK_UNTIL),
+            isBlockingRule = values.getAsInteger(IS_BLOCKING_RULE) != 0
         )
 
         fun wildcardsDbToView(number: String): String =

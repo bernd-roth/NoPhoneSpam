@@ -21,7 +21,7 @@ object BlockedCallHandler {
     const val NOTIFICATION_CHANNEL_ID = "blocked_calls"
 
     private fun activeTimeRangeFilter(now: Long): String =
-        "((${Number.BLOCK_FROM} IS NULL AND ${Number.BLOCK_UNTIL} IS NULL) OR " +
+        "${Number.IS_BLOCKING_RULE}=1 AND ((${Number.BLOCK_FROM} IS NULL AND ${Number.BLOCK_UNTIL} IS NULL) OR " +
         "((${Number.BLOCK_FROM} IS NULL OR $now >= ${Number.BLOCK_FROM}) AND " +
         "(${Number.BLOCK_UNTIL} IS NULL OR $now <= ${Number.BLOCK_UNTIL})))"
 
@@ -88,10 +88,12 @@ object BlockedCallHandler {
             val now = System.currentTimeMillis()
 
             if (pattern != null) {
-                // Insert pattern row if it doesn't exist yet
+                // Country rows created for history must never become blocking rules.
+                // Ignore conflicts so logging cannot change a manually configured rule.
                 val insertValues = ContentValues().apply {
                     put(Number.NUMBER, pattern)
                     put(Number.TIMES_CALLED, 0)
+                    put(Number.IS_BLOCKING_RULE, 0)
                 }
                 db.insertWithOnConflict(Number._TABLE, null, insertValues, SQLiteDatabase.CONFLICT_IGNORE)
 
@@ -116,7 +118,7 @@ object BlockedCallHandler {
                         val values = ContentValues()
                         DatabaseUtils.cursorRowToContentValues(it, values)
                         Number.fromValues(values)
-                    } else Number(number = pattern, timesCalled = 1, lastCall = now)
+                    } else Number(number = pattern, timesCalled = 1, lastCall = now, isBlockingRule = false)
                 }
             } else {
                 val callValues = ContentValues().apply {

@@ -219,6 +219,13 @@ private fun NumberItem(
                 text = displayNumber,
                 style = MaterialTheme.typography.bodyMedium
             )
+            if (!number.isBlockingRule) {
+                Text(
+                    text = stringResource(R.string.blacklist_history_only),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             if (number.lastCall != null) {
                 val formattedDate = SimpleDateFormat.getDateTimeInstance().format(Date(number.lastCall))
                 val statsText = pluralStringResource(

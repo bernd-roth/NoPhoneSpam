@@ -13,8 +13,7 @@ internal object CallBlockingPolicy {
         if (!blockingEnabled) return false
         if (incomingNumber.isNullOrEmpty()) return blockHiddenNumbers
 
-        // Country-wide patterns can be created by previous non-contact calls.
-        // In contacts-only mode, a saved contact must bypass those rules too.
+        // In contacts-only mode, a saved contact also bypasses explicit rules.
         if (blockNonContacts && isContact(incomingNumber)) return false
         return matchesBlacklist(incomingNumber) || blockNonContacts
     }

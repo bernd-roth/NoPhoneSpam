@@ -56,6 +56,7 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
         numberDb: String,
         blockFrom: Long?,
         blockUntil: Long?,
+        isBlockingRule: Boolean,
         onDone: () -> Unit
     ) {
         viewModelScope.launch {
@@ -66,8 +67,9 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
                     val values = ContentValues().apply {
                         put(Number.NAME, name)
                         put(Number.NUMBER, numberDb)
-                        if (blockFrom != null) put(Number.BLOCK_FROM, blockFrom) else putNull(Number.BLOCK_FROM)
-                        if (blockUntil != null) put(Number.BLOCK_UNTIL, blockUntil) else putNull(Number.BLOCK_UNTIL)
+                        put(Number.IS_BLOCKING_RULE, if (isBlockingRule) 1 else 0)
+                        if (isBlockingRule && blockFrom != null) put(Number.BLOCK_FROM, blockFrom) else putNull(Number.BLOCK_FROM)
+                        if (isBlockingRule && blockUntil != null) put(Number.BLOCK_UNTIL, blockUntil) else putNull(Number.BLOCK_UNTIL)
                     }
                     if (existingPattern != null) {
                         db.update(Number._TABLE, values, "${Number.NUMBER}=?", arrayOf(existingPattern))
@@ -85,7 +87,7 @@ class EditNumberViewModel(application: Application) : AndroidViewModel(applicati
 
                 // Schedule expiry alarm if blockUntil is in the future
                 val now = System.currentTimeMillis()
-                if (blockUntil != null && blockUntil > now) {
+                if (isBlockingRule && blockUntil != null && blockUntil > now) {
                     BlockScheduler.scheduleExpiry(getApplication(), numberDb, blockUntil)
                 }
             }

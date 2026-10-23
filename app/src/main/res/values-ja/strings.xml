@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NoPhoneSpam</string>
+    <string name="blacklist_history_only">履歴のみ · 通話をブロックしません</string>
+    <string name="edit_block_matching_calls">この項目に一致する通話をブロック</string>
 
     <!-- BlacklistActivity -->
     <string name="blacklist_blocking_enabled">ブロック有効</string>
