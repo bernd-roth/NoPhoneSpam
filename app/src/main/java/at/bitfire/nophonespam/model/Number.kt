@@ -1,6 +1,7 @@
 package at.bitfire.nophonespam.model
 
 import android.content.ContentValues
+import at.bitfire.nophonespam.CountryCode
 
 data class Number(
     val number: String = "",
@@ -10,6 +11,12 @@ data class Number(
     val blockFrom: Long? = null,
     val blockUntil: Long? = null
 ) {
+    /** Use the caller's country as the label when no custom name was saved. */
+    val displayName: String?
+        get() = name?.takeIf { it.isNotBlank() }
+            ?: CountryCode.findByDialCode(number).takeIf { it > 0 }
+                ?.let { CountryCode.COUNTRIES[it].name }
+
     companion object {
         const val _TABLE = "numbers"
         const val NUMBER = "number"

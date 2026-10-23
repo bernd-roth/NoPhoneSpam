@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                         BlacklistScreen(
                             onShortPress = { number ->
                                 val encodedNumber = Uri.encode(number.number)
-                                val encodedName = Uri.encode(number.name ?: "")
+                                val encodedName = Uri.encode(number.displayName ?: "")
                                 navController.navigate("blocked/$encodedNumber/$encodedName")
                             },
                             onLongPress = { number ->

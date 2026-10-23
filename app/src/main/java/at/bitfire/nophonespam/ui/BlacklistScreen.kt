@@ -186,6 +186,7 @@ private fun NumberItem(
     onLongPress: () -> Unit
 ) {
     val viewNumber = Number.wildcardsDbToView(number.number)
+    val displayName = number.displayName
     val countryIndex = CountryCode.findByDialCode(viewNumber)
     val displayNumber = if (countryIndex > 0) {
         "${CountryCode.COUNTRIES[countryIndex].flag} $viewNumber"
@@ -207,9 +208,9 @@ private fun NumberItem(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            if (!number.name.isNullOrBlank()) {
+            if (displayName != null) {
                 Text(
-                    text = number.name,
+                    text = displayName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )

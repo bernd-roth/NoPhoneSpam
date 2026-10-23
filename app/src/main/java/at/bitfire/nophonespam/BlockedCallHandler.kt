@@ -185,7 +185,7 @@ object BlockedCallHandler {
         )
 
         val contentText = when {
-            number?.name != null -> number.name
+            number?.displayName != null -> number.displayName
             number != null -> Number.wildcardsDbToView(number.number)
             else -> context.getString(R.string.receiver_notify_private_number)
         }
